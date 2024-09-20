@@ -7,7 +7,7 @@ import {
 import { lusitana } from "@/app/ui/fonts";
 import { fetchCardData } from "@/app/lib/data";
 import { Suspense } from "react";
-import { CardsSkeleton } from "../skeletons";
+import { CardsSkeleton, CardSkeleton } from "../skeletons";
 
 const iconMap = {
   collected: BanknotesIcon,
@@ -49,13 +49,16 @@ export default async function CardWrapper() {
   return (
     <>
       {/* NOTE: Uncomment this code in Chapter 9 */}
-      <Suspense fallback={<CardsSkeleton />}>
+      <Suspense fallback={<CardSkeleton />}>
         <Card title="Collected" value={totalPaidInvoices} type="collected" />
-
+      </Suspense>
+      <Suspense fallback={<CardSkeleton />}>
         <Card title="Pending" value={totalPendingInvoices} type="pending" />
-
+      </Suspense>
+      <Suspense fallback={<CardSkeleton />}>
         <Card title="Total Invoices" value={numberOfInvoices} type="invoices" />
-
+      </Suspense>
+      <Suspense fallback={<CardSkeleton />}>
         <Card
           title="Total Customers"
           value={numberOfCustomers}
@@ -68,10 +71,10 @@ export default async function CardWrapper() {
 function CardSkeletonFour() {
   return (
     <>
-      <CardSkeleton />
-      <CardSkeleton />
-      <CardSkeleton />
-      <CardSkeleton />
+      <CardsSkeleton />
+      <CardsSkeleton />
+      <CardsSkeleton />
+      <CardsSkeleton />
     </>
   );
 }
@@ -99,17 +102,20 @@ function CardSkeletonFour() {
 //   );
 // }
 
-export function Card({
-  title,
-  value,
-  type,
-}: {
-  title: string;
-  value: number | string;
-  type: "invoices" | "customers" | "pending" | "collected";
-}) {
+export async function Card({ title, value, type }) {
+  // : {
+  //   title: string;
+  //   value: number | string | Promise<string | number | unknown>;
+  //   type: "invoices" | "customers" | "pending" | "collected";
+  // }
   const Icon = iconMap[type];
-
+  let finalValue;
+  if (value instanceof Promise) {
+    console.log(`it's a promise`);
+    finalValue = await value;
+  } else {
+    finalValue = value;
+  }
   return (
     <div className="rounded-xl bg-gray-50 p-2 shadow-sm">
       <div className="flex p-4">
@@ -120,7 +126,7 @@ export function Card({
         className={`${lusitana.className}
           truncate rounded-xl bg-white px-4 py-8 text-center text-2xl`}
       >
-        {value}
+        {finalValue}
       </p>
     </div>
   );
